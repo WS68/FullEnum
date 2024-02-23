@@ -1,6 +1,4 @@
-﻿using RunAlgorithm.Core;
-
-namespace TwoPhaseCommit.Steps;
+﻿namespace RunAlgorithm.Core.Steps;
 
 public class VariantsStep : IStep
 {

@@ -1,22 +1,14 @@
-﻿using RunAlgorithm.Core;
+﻿namespace RunAlgorithm.Core.Steps;
 
-namespace TwoPhaseCommit.Steps
+public sealed class IdleStep : IStep
 {
-    public class IdleStep : IStep
+    public string Name => "idle";
+
+    public bool Execute(IContext context)
     {
-        public IdleStep()
-        {
-        }
-
-
-        public string Name => "";
-
-        public bool Execute(IContext context)
-        {
-            return true;
-        }
-
-        public bool IsList => false;
-        public IReadOnlyList<IStep> Variants => throw new NotImplementedException();
+        return true;
     }
+
+    public bool IsList => false;
+    public IReadOnlyList<IStep> Variants => throw new NotImplementedException();
 }

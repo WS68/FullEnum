@@ -1,15 +1,8 @@
-﻿using RunAlgorithm.Core;
+﻿namespace RunAlgorithm.Core.Steps;
 
-namespace TwoPhaseCommit.Steps;
-
-public class IdleStep : IStep
+public sealed class IdleStep : IStep
 {
-    public IdleStep()
-    {
-    }
-
-
-    public string Name => "";
+    public string Name => "idle";
 
     public bool Execute(IContext context)
     {

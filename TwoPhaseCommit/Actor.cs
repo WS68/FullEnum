@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using RunAlgorithm.Core;
+using RunAlgorithm.Core.Steps;
 using TwoPhaseCommit.Steps;
 
 namespace TwoPhaseCommit
@@ -17,13 +18,13 @@ namespace TwoPhaseCommit
                 new VariantsStep( 
                     new TimeoutStep( name ),
                     new IdleStep(),
-                    new FailedStep()
+                    new FailureStep()
                     ),
                 new CreateDocumentStep(),
                 new VariantsStep(
                     new TimeoutStep( name ),
                     new IdleStep(),
-                    new FailedStep()
+                    new FailureStep()
                 ),
                 new FixStep( name ),
             };

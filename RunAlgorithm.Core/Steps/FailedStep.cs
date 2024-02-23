@@ -1,14 +1,9 @@
 ﻿using RunAlgorithm.Core;
 
-namespace TwoPhaseCommit.Steps;
+namespace RunAlgorithm.Core.Steps;
 
-public class FailedStep : IStep
+public sealed class FailureStep : IStep
 {
-    public FailedStep()
-    {
-    }
-
-
     public string Name => "Fail";
 
     public bool Execute(IContext context)

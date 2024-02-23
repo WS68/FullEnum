@@ -4,7 +4,7 @@ namespace TwoPhaseCommit;
 
 public class Validator : IValidator
 {
-    public CheckResult EvaluateResult(IReadOnlyList<RunResult> results)
+    public CheckResult EvaluateResult(IContext context, IReadOnlyList<RunResult> results)
     {
         var ok = results.Count( r => r == RunResult.RunToEnd );
         if ( ok > 1  )

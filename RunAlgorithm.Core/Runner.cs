@@ -47,16 +47,6 @@ namespace RunAlgorithm.Core
             }
 
             ExecuteStep( _context, path, steps );
-
-            if (_failed > 0)
-            {
-                _logger.LogWarning($"RESULT: OK={_successOk}, Negative={_successBad}, Failures={_failed}");
-            }
-            else
-            {
-                _logger.LogInformation($"RESULT: OK={_successOk}, Negative={_successBad}, Failures={_failed}");
-            }
-
             return new RunStatistics(_successOk, _successBad, _failed);
         }
 

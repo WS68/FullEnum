@@ -10,6 +10,9 @@ namespace TwoPhaseCommit
     public class Context: IContext
     {
         private string? _tokenName;
+        private int _documents;
+
+        public int Documents => _documents;
 
         public IContext Clone()
         {
@@ -46,6 +49,11 @@ namespace TwoPhaseCommit
         {
             if (_tokenName == name)
                 _tokenName = null;
+        }
+
+        public void CreateDocument()
+        {
+            _documents++;
         }
     }
 }

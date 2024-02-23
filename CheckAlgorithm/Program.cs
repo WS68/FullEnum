@@ -29,8 +29,18 @@ namespace CheckAlgorithm
 
             var app = builder.Build();
             var runner = app.Services.GetRequiredService<Runner>();
-            runner.Run();
+            var stat = runner.Run();
 
+            var logger = app.Services.GetRequiredService<ILogger<Program>>();
+
+            if (stat.Failures > 0)
+            {
+                logger.LogWarning($"RESULT({stat.Total}): OK={stat.PositiveResults}, Negative={stat.NegativeResults}, Failures={stat.Failures}");
+            }
+            else
+            {
+                logger.LogInformation($"RESULT({stat.Total}): OK={stat.PositiveResults}, Negative={stat.NegativeResults}, Failures={stat.Failures}");
+            }
             app.Dispose();
         }
     }

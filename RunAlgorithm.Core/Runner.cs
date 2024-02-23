@@ -87,7 +87,7 @@ namespace RunAlgorithm.Core
                     }
                     catch (ApplicationException e)
                     {
-                        _logger.LogInformation($"Failed at {spath} ctx=[{ctx}]: {e.Message}");
+                        _logger.LogDebug($"Failed at {spath} ctx=[{ctx}]: {e.Message}");
                         result = RunResult.Failed;
                     }
                     catch (Exception e)

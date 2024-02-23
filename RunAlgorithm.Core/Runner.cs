@@ -11,12 +11,17 @@ namespace RunAlgorithm.Core
     {
         private readonly IEnumerable<IActor> _actors;
         private readonly IContext _context;
+        private readonly IValidator _validator;
         private readonly ILogger<Runner> _logger;
 
-        public Runner(IEnumerable<IActor> actors, IContext context, ILogger<Runner> logger)
+        public Runner(IEnumerable<IActor> actors, 
+            IContext context, 
+            IValidator validator,
+            ILogger<Runner> logger)
         {
             _actors = actors;
             _context = context;
+            _validator = validator;
             _logger = logger;
         }
 

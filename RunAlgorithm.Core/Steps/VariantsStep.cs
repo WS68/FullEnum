@@ -2,7 +2,7 @@
 
 namespace TwoPhaseCommit.Steps;
 
-internal class VariantsStep : IStep
+public class VariantsStep : IStep
 {
     private readonly IStep[] _step;
 

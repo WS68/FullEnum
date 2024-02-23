@@ -14,7 +14,17 @@ namespace TwoPhaseCommit
             _steps = new IStep[]
             {
                 new GetTokenStep( name ),
+                new VariantsStep( 
+                    new TimeoutStep( name ),
+                    new IdleStep(),
+                    new FailedStep()
+                    ),
                 new CreateDocumentStep(),
+                new VariantsStep(
+                    new TimeoutStep( name ),
+                    new IdleStep(),
+                    new FailedStep()
+                ),
                 new FixStep( name ),
             };
         }

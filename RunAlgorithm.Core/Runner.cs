@@ -17,9 +17,9 @@ namespace RunAlgorithm.Core
         private readonly IValidator _validator;
         private readonly ILogger<Runner> _logger;
 
-        private int _successOk;
-        private int _successBad;
-        private int _failed;
+        private long _successOk;
+        private long _successBad;
+        private long _failed;
 
         public EventHandler<RunArgs> Progress;
 
@@ -79,12 +79,12 @@ namespace RunAlgorithm.Core
                     }
                     catch (ApplicationException e)
                     {
-                        _logger.LogDebug($"Failed at {spath} ctx=[{ctx}]: {e.Message}");
+                        _logger.LogDebug("Failed at {0} ctx=[{1}]: {2}", spath, ctx, e.Message);
                         result = RunResult.Failed;
                     }
                     catch (Exception e)
                     {
-                        _logger.LogInformation( e, $"Failed at {spath} ctx=[{ctx}]" );
+                        _logger.LogInformation( e, "Failed at {0} ctx=[{1}]", spath, ctx);
                         result = RunResult.Failed;
                     }
 
@@ -126,7 +126,7 @@ namespace RunAlgorithm.Core
         private void CheckFire()
         {
             var items = _successBad + _successOk + _failed;
-            if (items % 50000 == 0 && items > 0)
+            if (items % 100000 == 0 && items > 0)
             {
                 var stat = new RunStatistics(_successOk, _successBad, _failed);
                 Progress?.Invoke( this, new RunArgs( stat ) );

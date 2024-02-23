@@ -1,6 +1,6 @@
 ﻿namespace RunAlgorithm.Core;
 
-public record RunStatistics( int PositiveResults, int NegativeResults, int Failures )
+public record RunStatistics( long PositiveResults, long NegativeResults, long Failures )
 {
-    public int Total => PositiveResults + NegativeResults + Failures;
+    public long Total => PositiveResults + NegativeResults + Failures;
 }

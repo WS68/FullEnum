@@ -9,7 +9,7 @@ namespace TwoPhaseCommit
 {
     public class Context: IContext
     {
-        private string _tokenName;
+        private string? _tokenName;
 
         public IContext Clone()
         {
@@ -35,6 +35,11 @@ namespace TwoPhaseCommit
             }
 
             throw new ApplicationException($"Token {name} fix rejected. Current: {_tokenName}");
+        }
+
+        public override string ToString()
+        {
+            return _tokenName ?? "<empty>";
         }
     }
 }

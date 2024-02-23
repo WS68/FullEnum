@@ -16,7 +16,7 @@ internal class RunActorStep
             _result = RunResult.RunToEnd;
     }
 
-    public bool Stopped => _result != RunResult.Running;
+    public bool Stopped => _result != RunResult.Running || _index >= _actor.Steps.Count - 1;
 
     public IActor Actor => _actor;
 

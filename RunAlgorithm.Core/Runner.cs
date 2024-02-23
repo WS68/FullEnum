@@ -17,6 +17,10 @@ namespace RunAlgorithm.Core
         private readonly IValidator _validator;
         private readonly ILogger<Runner> _logger;
 
+        private int successOk;
+        private int successBad;
+        private int failed;
+
         public Runner(IEnumerable<IActor> actors, 
             IContext context, 
             IValidator validator,
@@ -43,6 +47,15 @@ namespace RunAlgorithm.Core
             }
 
             ExecuteStep( _context, path, steps );
+
+            if (failed > 0)
+            {
+                _logger.LogWarning($"RESULT: OK={successOk}, Negative={successBad}, Failures={failed}");
+            }
+            else
+            {
+                _logger.LogInformation($"RESULT: OK={successOk}, Negative={successBad}, Failures={failed}");
+            }
         }
 
         private void ExecuteStep(IContext context, IPathStep path, List<RunActorStep> actors)
@@ -65,14 +78,19 @@ namespace RunAlgorithm.Core
                     var ctx = context.Clone();
                     try
                     {
-                        if (!step.Execute(context))
+                        if (!step.Execute(ctx))
                         {
                             result = RunResult.Stopped;
                         }
                     }
+                    catch (ApplicationException e)
+                    {
+                        _logger.LogInformation($"Failed at {spath} ctx=[{ctx}]: {e.Message}");
+                        result = RunResult.Failed;
+                    }
                     catch (Exception e)
                     {
-                        _logger.LogWarning( e, $"Failed at {spath}" );
+                        _logger.LogInformation( e, $"Failed at {spath} ctx=[{ctx}]" );
                         result = RunResult.Failed;
                     }
 
@@ -90,7 +108,20 @@ namespace RunAlgorithm.Core
                 var result = _validator.EvaluateResult(results);
                 if (result == CheckResult.Failure)
                 {
-                    _logger.LogWarning( $"Failed: {path}" );
+                    _logger.LogWarning( $"Failed Validation: {path}" );
+                    Interlocked.Increment(ref failed);
+                }
+                else if (result == CheckResult.SuccessNegative)
+                {
+                    Interlocked.Increment(ref successBad);
+                }
+                else if ( result == CheckResult.SuccessPositive )
+                {
+                    Interlocked.Increment(ref successOk);
+                }
+                else
+                {
+                    _logger.LogError($"Unxepected result {result} as {path}");
                 }
             }
         }

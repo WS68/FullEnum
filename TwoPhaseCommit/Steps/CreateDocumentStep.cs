@@ -4,7 +4,7 @@ namespace TwoPhaseCommit.Steps;
 
 public class CreateDocumentStep : IStep
 {
-    public string Name { get; }
+    public string Name => "Doc";
     public bool Execute(IContext context)
     {
         return true;

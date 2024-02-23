@@ -3,6 +3,10 @@
 public enum RunResult
 {
     /// <summary>
+    /// Незавершен
+    /// </summary>
+    Running,
+    /// <summary>
     /// Завершено успешно
     /// </summary>
     RunToEnd,

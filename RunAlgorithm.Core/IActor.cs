@@ -4,7 +4,7 @@ public interface IActor
 {
     public string Name { get; }
 
-    IReadOnlyList<IStep> Steps();
+    IReadOnlyList<IStep> Steps { get; }
 }
 
 public interface IStep

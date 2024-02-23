@@ -1,4 +1,6 @@
-﻿namespace RunAlgorithm.Core.Runtime;
+﻿using System.Text;
+
+namespace RunAlgorithm.Core.Runtime;
 
 internal class ExecPath : IPathStep
 {
@@ -9,5 +11,14 @@ internal class ExecPath : IPathStep
         _initString = initString;
     }
 
-    public IPathStep Parent => null;
+    public IPathStep? Parent => null;
+
+    void IPathStep.WriteTo(StringBuilder sb)
+    {
+    }
+
+    public override string ToString()
+    {
+        return "Root Path???";
+    }
 }

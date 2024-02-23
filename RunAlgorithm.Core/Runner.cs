@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -44,8 +45,9 @@ namespace RunAlgorithm.Core
             ExecuteStep( _context, path, steps );
         }
 
-        private void ExecuteStep(IContext context, ExecPath path, List<RunActorStep> actors)
+        private void ExecuteStep(IContext context, IPathStep path, List<RunActorStep> actors)
         {
+            bool wasExecute = false;
             for (var index = 0; index < actors.Count; index++)
             {
                 var actor = actors[index];
@@ -55,16 +57,40 @@ namespace RunAlgorithm.Core
                 int aindex = actor.Index + 1;
                 foreach (var step in actor.GetNextSteps())
                 {
+                    wasExecute = true;
+
                     var spath = new StepPath( path, index, step.Name );
+
+                    var result = RunResult.Running;
                     var ctx = context.Clone();
                     try
                     {
-
+                        if (!step.Execute(context))
+                        {
+                            result = RunResult.Stopped;
+                        }
                     }
                     catch (Exception e)
                     {
-                        _logger.Log(  );
+                        _logger.LogWarning( e, $"Failed at {spath}" );
+                        result = RunResult.Failed;
                     }
+
+                    var ss = new RunActorStep(actor.Actor, aindex, result);
+                    var nactors = new List<RunActorStep>( actors );
+                    nactors[index] = ss;
+
+                    ExecuteStep( ctx, spath, nactors );
+                }
+            }
+
+            if (!wasExecute)
+            {
+                var results = actors.Select(s => s.FinalResult).ToArray();
+                var result = _validator.EvaluateResult(results);
+                if (result == CheckResult.Failure)
+                {
+                    _logger.LogWarning( $"Failed: {path}" );
                 }
             }
         }
@@ -91,6 +117,9 @@ namespace RunAlgorithm.Core
         public IActor Actor => _actor;
 
         public int Index => _index;
+        public RunResult FinalResult =>
+            _result == RunResult.Running ? 
+                RunResult.RunToEnd : _result;
 
         public IEnumerable<IStep> GetNextSteps()
         {

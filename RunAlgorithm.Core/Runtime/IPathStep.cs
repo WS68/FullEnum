@@ -1,6 +1,9 @@
-﻿namespace RunAlgorithm.Core.Runtime;
+﻿using System.Text;
+
+namespace RunAlgorithm.Core.Runtime;
 
 internal interface IPathStep
 {
-    IPathStep Parent { get; }
+    IPathStep? Parent { get; }
+    void WriteTo(StringBuilder sb);
 }

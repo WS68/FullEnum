@@ -17,9 +17,9 @@ namespace RunAlgorithm.Core
         private readonly IValidator _validator;
         private readonly ILogger<Runner> _logger;
 
-        private int successOk;
-        private int successBad;
-        private int failed;
+        private int _successOk;
+        private int _successBad;
+        private int _failed;
 
         public Runner(IEnumerable<IActor> actors, 
             IContext context, 
@@ -32,7 +32,7 @@ namespace RunAlgorithm.Core
             _logger = logger;
         }
 
-        public void Run()
+        public RunStatistics Run()
         {
             IList<IActor> actors = _actors.ToList();
 
@@ -48,14 +48,16 @@ namespace RunAlgorithm.Core
 
             ExecuteStep( _context, path, steps );
 
-            if (failed > 0)
+            if (_failed > 0)
             {
-                _logger.LogWarning($"RESULT: OK={successOk}, Negative={successBad}, Failures={failed}");
+                _logger.LogWarning($"RESULT: OK={_successOk}, Negative={_successBad}, Failures={_failed}");
             }
             else
             {
-                _logger.LogInformation($"RESULT: OK={successOk}, Negative={successBad}, Failures={failed}");
+                _logger.LogInformation($"RESULT: OK={_successOk}, Negative={_successBad}, Failures={_failed}");
             }
+
+            return new RunStatistics(_successOk, _successBad, _failed);
         }
 
         private void ExecuteStep(IContext context, IPathStep path, List<RunActorStep> actors)
@@ -105,19 +107,19 @@ namespace RunAlgorithm.Core
             if (!wasExecute)
             {
                 var results = actors.Select(s => s.FinalResult).ToArray();
-                var result = _validator.EvaluateResult(results);
+                var result = _validator.EvaluateResult(context, results);
                 if (result == CheckResult.Failure)
                 {
                     _logger.LogWarning( $"Failed Validation: {path}" );
-                    Interlocked.Increment(ref failed);
+                    _failed++;
                 }
                 else if (result == CheckResult.SuccessNegative)
                 {
-                    Interlocked.Increment(ref successBad);
+                    _successBad++;
                 }
                 else if ( result == CheckResult.SuccessPositive )
                 {
-                    Interlocked.Increment(ref successOk);
+                    _successOk++;
                 }
                 else
                 {

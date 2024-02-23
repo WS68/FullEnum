@@ -2,7 +2,7 @@
 
 namespace RunAlgorithm.Core.Steps;
 
-public sealed class FailedStep : IStep
+public sealed class FailureStep : IStep
 {
     public string Name => "Fail";
 

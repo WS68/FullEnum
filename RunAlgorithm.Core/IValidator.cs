@@ -2,5 +2,5 @@
 
 public interface IValidator
 {
-    CheckResult EvaluateResult(IReadOnlyList<RunResult> results);
+    CheckResult EvaluateResult(IContext context, IReadOnlyList<RunResult> results);
 }

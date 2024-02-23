@@ -21,6 +21,8 @@ namespace RunAlgorithm.Core
         private int _successBad;
         private int _failed;
 
+        public EventHandler<RunArgs> Progress;
+
         public Runner(IEnumerable<IActor> actors, 
             IContext context, 
             IValidator validator,
@@ -102,19 +104,32 @@ namespace RunAlgorithm.Core
                 {
                     _logger.LogWarning( $"Failed Validation: {path}" );
                     _failed++;
+                    CheckFire();
                 }
                 else if (result == CheckResult.SuccessNegative)
                 {
                     _successBad++;
+                    CheckFire();
                 }
                 else if ( result == CheckResult.SuccessPositive )
                 {
                     _successOk++;
+                    CheckFire();
                 }
                 else
                 {
                     _logger.LogError($"Unxepected result {result} as {path}");
                 }
+            }
+        }
+
+        private void CheckFire()
+        {
+            var items = _successBad + _successOk + _failed;
+            if (items % 50000 == 0 && items > 0)
+            {
+                var stat = new RunStatistics(_successOk, _successBad, _failed);
+                Progress?.Invoke( this, new RunArgs( stat ) );
             }
         }
     }

@@ -41,5 +41,11 @@ namespace TwoPhaseCommit
         {
             return _tokenName ?? "<empty>";
         }
+
+        public void ResetToken(string name)
+        {
+            if (_tokenName == name)
+                _tokenName = null;
+        }
     }
 }

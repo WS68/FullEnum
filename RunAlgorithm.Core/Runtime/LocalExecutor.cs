@@ -28,7 +28,7 @@ namespace RunAlgorithm.Core.Runtime
 
         public void Execute()
         {
-            while ( !ExecuteStep() )
+            while ( ExecuteStep() )
             {
 
             }

@@ -12,6 +12,7 @@ namespace RunAlgorithm.Core
 {
     public class Runner: IRunnerHost
     {
+        private const int ProgressItemCount = 100000;
         private readonly IEnumerable<IActor> _actors;
         private readonly IContext _context;
         private readonly IValidator _validator;
@@ -20,6 +21,11 @@ namespace RunAlgorithm.Core
         private long _successOk;
         private long _successBad;
         private long _failed;
+
+        private long _totals;
+        private long _nextFire = ProgressItemCount;
+
+        private readonly object _lockStat = new object();
 
         public EventHandler<RunArgs> Progress;
 
@@ -48,7 +54,7 @@ namespace RunAlgorithm.Core
                 steps.Add(step );
             }
 
-            var executor = new SimpleExecutor(this);
+            var executor = new SmartExecutor(this);
             ExecuteStep(this, _context, path, steps, executor );
             executor.Execute();
 
@@ -139,14 +145,10 @@ namespace RunAlgorithm.Core
             }
         }
 
-        private void CheckFire()
+        private void Fire()
         {
-            var items = _successBad + _successOk + _failed;
-            if (items % 100000 == 0 && items > 0)
-            {
-                var stat = new RunStatistics(_successOk, _successBad, _failed);
-                Progress?.Invoke( this, new RunArgs( stat ) );
-            }
+            var stat = new RunStatistics(_successOk, _successBad, _failed);
+            Progress?.Invoke( this, new RunArgs( stat ) );
         }
 
         IValidator IRunnerHost.Validator => _validator;
@@ -154,9 +156,19 @@ namespace RunAlgorithm.Core
 
         void IRunnerHost.AddResults(RunStatistics results)
         {
-            Interlocked.Add(ref _failed, results.Failures);
-            Interlocked.Add(ref _successOk, results.PositiveResults);
-            Interlocked.Add(ref _successBad, results.NegativeResults);
+            lock (_lockStat)
+            {
+                _failed += results.Failures;
+                _successOk += results.PositiveResults;
+                _successBad += results.NegativeResults;
+
+                _totals += results.Total;
+                if (_totals >= _nextFire)
+                {
+                    _nextFire += ProgressItemCount;
+                    Fire();
+                }
+            }
         }
     }
 }

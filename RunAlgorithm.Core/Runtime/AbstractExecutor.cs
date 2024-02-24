@@ -11,27 +11,48 @@ namespace RunAlgorithm.Core.Runtime
         private IRunnerHost _owner;
         private readonly IList<IExecItem> _items = new List<IExecItem>();
 
+        private long _successOk;
+        private long _successBad;
+        private long _failed;
+
         public AbstractExecutor(IRunnerHost owner)
         {
             _owner = owner;
         }
 
-        public void PushItem(IExecItem item)
+        public IRunnerHost Owner => _owner;
+
+        public virtual void PushItem(IExecItem item)
         {
             _items.Add( item );
         }
 
         public void StoreResults(RunStatistics results)
         {
-            _owner.AddResults( results );
+            _failed += results.Failures;
+            _successOk += results.PositiveResults;
+            _successBad += results.NegativeResults;
+
+            //_owner.AddResults( results );
         }
 
         public void Execute()
         {
             while ( ExecuteStep() )
             {
-
+                PushStat();
             }
+            PushStat();
+        }
+
+        protected void PushStat()
+        {
+            if ( _successBad + _successOk + _failed == 0 )
+                return;
+
+            var results = new RunStatistics( _successOk, _successBad, _failed );
+            _successOk = _successBad = _failed = 0;
+            _owner.AddResults( results );
         }
 
         protected abstract bool ExecuteStep();

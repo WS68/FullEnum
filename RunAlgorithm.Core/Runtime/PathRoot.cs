@@ -2,15 +2,8 @@
 
 namespace RunAlgorithm.Core.Runtime;
 
-internal class ExecPath : IPathStep
+internal class PathRoot : IPathStep
 {
-    private readonly string[] _initString;
-
-    public ExecPath(string[] initString)
-    {
-        _initString = initString;
-    }
-
     public IPathStep? Parent => null;
 
     void IPathStep.WriteTo(StringBuilder sb)

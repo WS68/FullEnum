@@ -10,8 +10,9 @@ using RunAlgorithm.Core.Runtime;
 
 namespace RunAlgorithm.Core
 {
-    public class Runner
+    public class Runner: IRunnerHost
     {
+        private const int ProgressItemCount = 100000;
         private readonly IEnumerable<IActor> _actors;
         private readonly IContext _context;
         private readonly IValidator _validator;
@@ -20,6 +21,11 @@ namespace RunAlgorithm.Core
         private long _successOk;
         private long _successBad;
         private long _failed;
+
+        private long _totals;
+        private long _nextFire = ProgressItemCount;
+
+        private readonly object _lockStat = new object();
 
         public EventHandler<RunArgs> Progress;
 
@@ -38,7 +44,7 @@ namespace RunAlgorithm.Core
         {
             IList<IActor> actors = _actors.ToList();
 
-            var path = new ExecPath( actors.Select( a => a.Name ).ToArray() );
+            var path = new PathRoot();
 
 
             List<RunActorStep> steps = new List<RunActorStep>();
@@ -48,11 +54,18 @@ namespace RunAlgorithm.Core
                 steps.Add(step );
             }
 
-            ExecuteStep( _context, path, steps );
+            var executor = new SmartExecutor(this);
+            ExecuteStep(this, _context, path, steps, executor );
+            executor.Execute();
+
             return new RunStatistics(_successOk, _successBad, _failed);
         }
 
-        private void ExecuteStep(IContext context, IPathStep path, List<RunActorStep> actors)
+        internal static void ExecuteStep(IRunnerHost host, 
+            IContext context, 
+            IPathStep path, 
+            IList<RunActorStep> actors,
+            IExecutor executor )
         {
             bool wasExecute = false;
             for (var index = 0; index < actors.Count; index++)
@@ -79,12 +92,12 @@ namespace RunAlgorithm.Core
                     }
                     catch (ApplicationException e)
                     {
-                        _logger.LogDebug("Failed at {0} ctx=[{1}]: {2}", spath, ctx, e.Message);
+                        host.Logger.LogDebug("Failed at {0} ctx=[{1}]: {2}", spath, ctx, e.Message);
                         result = RunResult.Failed;
                     }
                     catch (Exception e)
                     {
-                        _logger.LogInformation( e, "Failed at {0} ctx=[{1}]", spath, ctx);
+                        host.Logger.LogInformation( e, "Failed at {0} ctx=[{1}]", spath, ctx);
                         result = RunResult.Failed;
                     }
 
@@ -92,44 +105,69 @@ namespace RunAlgorithm.Core
                     var nactors = new List<RunActorStep>( actors );
                     nactors[index] = ss;
 
-                    ExecuteStep( ctx, spath, nactors );
+                    var item = new ExecItem( host, ctx, spath, nactors );  
+                    //ExecuteStep(host, ctx, spath, nactors);
+
+                    executor.PushItem( item );
                 }
             }
 
             if (!wasExecute)
             {
+                long successOk = 0;
+                long successBad = 0;
+                long failed = 0;
+
                 var results = actors.Select(s => s.FinalResult).ToArray();
-                var result = _validator.EvaluateResult(context, results);
+                var result = host.Validator.EvaluateResult(context, results);
                 if (result == CheckResult.Failure)
                 {
-                    _logger.LogWarning( $"Failed Validation: {path}" );
-                    _failed++;
-                    CheckFire();
+                    host.Logger.LogWarning( $"Failed Validation: {path}" );
+                    failed++;
+                    //CheckFire();
                 }
                 else if (result == CheckResult.SuccessNegative)
                 {
-                    _successBad++;
-                    CheckFire();
+                    successBad++;
+                    //CheckFire();
                 }
                 else if ( result == CheckResult.SuccessPositive )
                 {
-                    _successOk++;
-                    CheckFire();
+                    successOk++;
+                    //CheckFire();
                 }
                 else
                 {
-                    _logger.LogError($"Unxepected result {result} as {path}");
+                    host.Logger.LogError($"Unxepected result {result} as {path}");
                 }
+
+                executor.StoreResults( new RunStatistics( successOk, successBad, failed  ) );
             }
         }
 
-        private void CheckFire()
+        private void Fire()
         {
-            var items = _successBad + _successOk + _failed;
-            if (items % 100000 == 0 && items > 0)
+            var stat = new RunStatistics(_successOk, _successBad, _failed);
+            Progress?.Invoke( this, new RunArgs( stat ) );
+        }
+
+        IValidator IRunnerHost.Validator => _validator;
+        ILogger IRunnerHost.Logger => _logger;
+
+        void IRunnerHost.AddResults(RunStatistics results)
+        {
+            lock (_lockStat)
             {
-                var stat = new RunStatistics(_successOk, _successBad, _failed);
-                Progress?.Invoke( this, new RunArgs( stat ) );
+                _failed += results.Failures;
+                _successOk += results.PositiveResults;
+                _successBad += results.NegativeResults;
+
+                _totals += results.Total;
+                if (_totals >= _nextFire)
+                {
+                    _nextFire += ProgressItemCount;
+                    Fire();
+                }
             }
         }
     }

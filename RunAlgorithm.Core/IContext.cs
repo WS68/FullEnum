@@ -1,4 +1,4 @@
-﻿namespace RunAlgorithm.Core;
+namespace RunAlgorithm.Core;
 
 public interface IContext
 {

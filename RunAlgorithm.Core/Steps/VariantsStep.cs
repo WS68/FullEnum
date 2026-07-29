@@ -1,4 +1,4 @@
-﻿namespace RunAlgorithm.Core.Steps;
+namespace RunAlgorithm.Core.Steps;
 
 public class VariantsStep : IStep
 {

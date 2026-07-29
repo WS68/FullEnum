@@ -1,4 +1,4 @@
-﻿using RunAlgorithm.Core;
+using RunAlgorithm.Core;
 
 namespace RunAlgorithm.Core.Steps;
 

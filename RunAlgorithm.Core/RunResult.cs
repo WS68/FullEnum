@@ -1,4 +1,4 @@
-﻿namespace RunAlgorithm.Core;
+namespace RunAlgorithm.Core;
 
 public enum RunResult
 {

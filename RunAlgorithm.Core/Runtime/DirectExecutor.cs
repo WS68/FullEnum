@@ -1,4 +1,4 @@
-﻿namespace RunAlgorithm.Core.Runtime;
+namespace RunAlgorithm.Core.Runtime;
 
 class DirectExecutor : AbstractExecutor
 {

@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 using RunAlgorithm.Core;
 using RunAlgorithm.Core.Steps;
 using TwoPhaseCommit.Steps;

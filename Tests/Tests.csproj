@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RunAlgorithm.Core\RunAlgorithm.Core.csproj" />
+    <ProjectReference Include="..\SyncRootFolders\SyncRootFolders.csproj" />
   </ItemGroup>
 
 </Project>

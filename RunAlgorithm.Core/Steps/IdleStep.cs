@@ -1,4 +1,4 @@
-﻿namespace RunAlgorithm.Core.Steps;
+namespace RunAlgorithm.Core.Steps;
 
 public sealed class IdleStep : IStep
 {

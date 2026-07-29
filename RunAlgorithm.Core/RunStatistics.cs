@@ -1,4 +1,4 @@
-﻿namespace RunAlgorithm.Core;
+namespace RunAlgorithm.Core;
 
 public record RunStatistics( long PositiveResults, long NegativeResults, long Failures )
 {

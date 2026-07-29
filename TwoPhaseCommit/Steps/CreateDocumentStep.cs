@@ -1,4 +1,4 @@
-﻿using RunAlgorithm.Core;
+using RunAlgorithm.Core;
 using System.Xml.Linq;
 
 namespace TwoPhaseCommit.Steps;

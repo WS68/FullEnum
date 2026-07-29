@@ -7,9 +7,9 @@ using TwoPhaseCommit;
 namespace CheckAlgorithm;
 
 public static class Scenario
-{
-    public static IHostBuilder CheckTwoPhaseCommit(this IHostBuilder builder)
     {
+    public static IHostBuilder CheckTwoPhaseCommit(this IHostBuilder builder)
+        {
         return builder.ConfigureServices(s =>
         {
             s.AddSingleton<IActor>(new TwoPhaseCommit.Actor("1st"));
@@ -18,10 +18,10 @@ public static class Scenario
             s.AddSingleton<IValidator, TwoPhaseCommit.Validator>();
             s.AddTransient<Runner>();
         });
-    }
+        }
 
     public static IHostBuilder CheckSyncRootFolder(this IHostBuilder builder)
-    {
+        {
         return builder.ConfigureServices(s =>
         {
             s.AddSingleton<IActor>(new SyncRootFolders.Actor("Remove", false, true));
@@ -30,5 +30,5 @@ public static class Scenario
             s.AddSingleton<IValidator, SyncRootFolders.Validator>();
             s.AddTransient<Runner>();
         });
+        }
     }
-}

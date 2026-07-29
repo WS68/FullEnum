@@ -9,6 +9,7 @@ public sealed class Context : IContext
     private readonly HashSet<int> _completedTransactions;
     private readonly Dictionary<string, int> _actorTransactions;
     private readonly Dictionary<string, bool> _savedIsRoot;
+    private readonly Dictionary<string, bool> _savedInContent;
     private MvccValue<bool> _isRoot;
     private MvccValue<bool> _inContent;
     private MvccValue<bool> _needCheck;
@@ -19,6 +20,7 @@ public sealed class Context : IContext
         _completedTransactions = new() { 0 };
         _actorTransactions = new();
         _savedIsRoot = new();
+        _savedInContent = new();
         _isRoot = new MvccValue<bool>(true);
         _inContent = new MvccValue<bool>(false);
         _needCheck = new MvccValue<bool>(false);
@@ -31,6 +33,7 @@ public sealed class Context : IContext
         _completedTransactions = new(source._completedTransactions);
         _actorTransactions = new(source._actorTransactions);
         _savedIsRoot = new(source._savedIsRoot);
+        _savedInContent = new(source._savedInContent);
         _isRoot = source._isRoot.Clone();
         _inContent = source._inContent.Clone();
         _needCheck = source._needCheck.Clone();
@@ -51,6 +54,10 @@ public sealed class Context : IContext
     public bool ReadNeedCheckImplicit() => _needCheck.Read(new HashSet<int>(_completedTransactions));
     public void SaveIsRoot(string actor, bool value) => _savedIsRoot[actor] = value;
     public bool SavedIsRoot(string actor) => _savedIsRoot.TryGetValue(actor, out var value) ? value : throw new ApplicationException($"Actor {actor} has not read isRoot");
+    public bool ReadIsRoot(string actor) => _isRoot.Read(TransactionFor(actor));
+    public bool ReadInContent(string actor) => _inContent.Read(TransactionFor(actor));
+    public void SaveInContent(string actor, bool value) => _savedInContent[actor] = value;
+    public bool SavedInContent(string actor) => _savedInContent.TryGetValue(actor, out var value) ? value : throw new ApplicationException($"Actor {actor} has not read inContent");
     public void WriteInContent(string actor, bool value) => _inContent.Write(TransactionFor(actor), value);
     public void WriteIsRoot(string actor, bool value) => _isRoot.Write(TransactionFor(actor), value);
     public void WriteNeedCheck(string actor, bool value) => _needCheck.Write(TransactionFor(actor), value);

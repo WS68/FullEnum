@@ -217,13 +217,74 @@ namespace Tests
             var validator = new Validator();
             var context = new Context();
 
+            context.GetTransaction("initial");
+            context.WriteInContent("initial", true);
+            context.CloseTransaction("initial");
+
             Assert.AreEqual(CheckResult.Failure, validator.EvaluateResult(context, Array.Empty<RunResult>()));
 
             context.GetTransaction("actor");
+            context.WriteInContent("actor", true);
             context.WriteNeedCheck("actor", true);
             context.CloseTransaction("actor");
 
             Assert.AreEqual(CheckResult.SuccessNegative, validator.EvaluateResult(context, Array.Empty<RunResult>()));
+            }
+
+        [TestMethod]
+        public void CheckActorStopsWhenNeedCheckIsFalse()
+            {
+            var actor = new CheckActor();
+
+            Assert.IsFalse(actor.Steps[0].Execute(new Context()));
+            }
+
+        [TestMethod]
+        public void CheckActorCorrectsMatchingValuesAndResetsNeedCheck()
+            {
+            var context = new Context();
+            context.GetTransaction("setup");
+            context.WriteInContent("setup", true);
+            context.WriteNeedCheck("setup", true);
+            context.CloseTransaction("setup");
+
+            var actor = new CheckActor();
+            Assert.IsTrue(actor.Steps[0].Execute(context));
+            actor.Steps[1].Execute(context);
+            actor.Steps[2].Execute(context);
+            actor.Steps[3].Execute(context);
+            actor.Steps[4].Execute(context);
+
+            Assert.IsTrue(context.ReadIsRootImplicit());
+            Assert.IsTrue(context.ReadNeedCheckImplicit());
+
+            actor.Steps[5].Execute(context);
+
+            Assert.IsFalse(context.ReadIsRootImplicit());
+            Assert.IsFalse(context.ReadNeedCheckImplicit());
+            }
+
+        [TestMethod]
+        public void CheckActorDoesNotChangeDifferentValues()
+            {
+            var context = new Context();
+            context.GetTransaction("setup");
+            context.WriteIsRoot("setup", false);
+            context.WriteInContent("setup", true);
+            context.WriteNeedCheck("setup", true);
+            context.CloseTransaction("setup");
+
+            var actor = new CheckActor();
+            Assert.IsTrue(actor.Steps[0].Execute(context));
+            actor.Steps[1].Execute(context);
+            actor.Steps[2].Execute(context);
+            actor.Steps[3].Execute(context);
+            actor.Steps[4].Execute(context);
+            actor.Steps[5].Execute(context);
+
+            Assert.IsFalse(context.ReadIsRootImplicit());
+            Assert.IsTrue(context.ReadInContentImplicit());
+            Assert.IsFalse(context.ReadNeedCheckImplicit());
             }
         }
     }

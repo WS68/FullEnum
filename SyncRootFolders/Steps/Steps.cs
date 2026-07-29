@@ -68,3 +68,42 @@ public sealed class CloseTransactionStep : ContextStep
         return true;
         }
     }
+
+public sealed class ReadNeedCheckStep : ContextStep
+    {
+    public ReadNeedCheckStep(string actor) : base("ReadNeedCheck_" + actor) { }
+    public override bool Execute(IContext context) => ((Context)context).ReadNeedCheckImplicit();
+    }
+public sealed class ReadTransactionValuesStep : ContextStep
+    {
+    public ReadTransactionValuesStep(string actor) : base("ReadTransactionValues_" + actor) { }
+    public override bool Execute(IContext context)
+        {
+        var actor = Name["ReadTransactionValues_".Length..];
+        var ctx = (Context)context;
+        ctx.SaveIsRoot(actor, ctx.ReadIsRoot(actor));
+        ctx.SaveInContent(actor, ctx.ReadInContent(actor));
+        return true;
+        }
+    }
+public sealed class CorrectIsRootStep : ContextStep
+    {
+    public CorrectIsRootStep(string actor) : base("CorrectIsRoot_" + actor) { }
+    public override bool Execute(IContext context)
+        {
+        var actor = Name["CorrectIsRoot_".Length..];
+        var ctx = (Context)context;
+        if (ctx.SavedIsRoot(actor) == ctx.SavedInContent(actor))
+            ctx.WriteIsRoot(actor, !ctx.SavedInContent(actor));
+        return true;
+        }
+    }
+public sealed class ResetNeedCheckStep : ContextStep
+    {
+    public ResetNeedCheckStep(string actor) : base("ResetNeedCheck_" + actor) { }
+    public override bool Execute(IContext context)
+        {
+        ((Context)context).WriteNeedCheck(Name["ResetNeedCheck_".Length..], false);
+        return true;
+        }
+    }

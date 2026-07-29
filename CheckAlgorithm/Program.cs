@@ -16,16 +16,7 @@ namespace CheckAlgorithm
                     l.AddConsole();
                     l.SetMinimumLevel(LogLevel.Information);
                 })
-                .ConfigureServices(s =>
-                {
-                    s.AddSingleton<IActor>( new Actor("1st") );
-                    s.AddSingleton<IActor>(new Actor("2nd"));
-
-                    s.AddSingleton<IContext, Context>();
-                    s.AddSingleton<IValidator, Validator>();
-
-                    s.AddTransient<Runner>();
-                });
+                .CheckTwoPhaseCommit();
 
             var app = builder.Build();
             var runner = app.Services.GetRequiredService<Runner>();

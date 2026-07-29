@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TwoPhaseCommit", "TwoPhaseC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{D31B4241-6669-4806-91C6-62E51BA59254}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SyncRootFolders", "SyncRootFolders\SyncRootFolders.csproj", "{E1B4A1A3-37E8-4CCB-AE0A-8A8D4A8A3E17}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{D31B4241-6669-4806-91C6-62E51BA59254}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D31B4241-6669-4806-91C6-62E51BA59254}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D31B4241-6669-4806-91C6-62E51BA59254}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1B4A1A3-37E8-4CCB-AE0A-8A8D4A8A3E17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1B4A1A3-37E8-4CCB-AE0A-8A8D4A8A3E17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1B4A1A3-37E8-4CCB-AE0A-8A8D4A8A3E17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1B4A1A3-37E8-4CCB-AE0A-8A8D4A8A3E17}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -5,11 +5,12 @@ namespace SyncRootFolders;
 
 public sealed class Actor : IActor
     {
-    public Actor(string name, bool inContent, bool isRoot)
+    public Actor(string name, int flag, bool inContent, bool isRoot)
         {
         Name = name;
-        Steps = new IStep[] { new ReadIsRootStep(name), new OpenTransactionStep(name), new WriteInContentStep(name, inContent), new FixIsRootStep(name, isRoot), new CloseTransactionStep(name) };
+        Steps = new IStep[] { new ReadIsRootStep(name), new OpenTransactionStep(name), new WriteInContentStep(name, inContent), new FixIsRootStep(name, flag, isRoot), new CloseTransactionStep(name) };
         }
+    public Actor(string name, bool inContent, bool isRoot) : this(name, 1, inContent, isRoot) { }
     public string Name
         {
         get;

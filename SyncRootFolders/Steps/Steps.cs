@@ -49,13 +49,15 @@ public sealed class WriteInContentStep : ContextStep
 public sealed class FixIsRootStep : ContextStep
     {
     private readonly bool _target;
-    public FixIsRootStep(string actor, bool target) : base("FixIsRoot_" + actor) { _target = target; }
+    private readonly int _flag;
+    public FixIsRootStep(string actor, int flag, bool target) : base("FixIsRoot_" + actor) { _flag = flag; _target = target; }
+    public FixIsRootStep(string actor, bool target) : this(actor, 1, target) { }
     public override bool Execute(IContext context)
         {
         var actor = Name["FixIsRoot_".Length..];
         var ctx = (Context)context;
         if (ctx.SavedIsRoot(actor) != _target)
-            ctx.WriteNeedCheck(actor, true);
+            ctx.WriteNeedCheck(actor, _flag, true);
         return true;
         }
     }
@@ -72,7 +74,22 @@ public sealed class CloseTransactionStep : ContextStep
 public sealed class ReadNeedCheckStep : ContextStep
     {
     public ReadNeedCheckStep(string actor) : base("ReadNeedCheck_" + actor) { }
-    public override bool Execute(IContext context) => ((Context)context).ReadNeedCheckImplicit();
+    public override bool Execute(IContext context)
+        {
+        var actor = Name["ReadNeedCheck_".Length..];
+        var ctx = (Context)context;
+        if (ctx.ReadNeedCheckImplicit(1))
+            {
+            ctx.SaveReadNeedCheckFlag(actor, 1);
+            return true;
+            }
+        if (ctx.ReadNeedCheckImplicit(2))
+            {
+            ctx.SaveReadNeedCheckFlag(actor, 2);
+            return true;
+            }
+        return false;
+        }
     }
 public sealed class ReadTransactionValuesStep : ContextStep
     {
@@ -103,7 +120,9 @@ public sealed class ResetNeedCheckStep : ContextStep
     public ResetNeedCheckStep(string actor) : base("ResetNeedCheck_" + actor) { }
     public override bool Execute(IContext context)
         {
-        ((Context)context).WriteNeedCheck(Name["ResetNeedCheck_".Length..], false);
+        var actor = Name["ResetNeedCheck_".Length..];
+        var ctx = (Context)context;
+        ctx.WriteNeedCheck(actor, ctx.ReadSavedNeedCheckFlag(actor), false);
         return true;
         }
     }

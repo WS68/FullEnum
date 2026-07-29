@@ -8,12 +8,12 @@ public sealed class Validator : IValidator
         {
         var ctx = (Context)context;
 
-        if (ctx.ReadNeedCheckImplicit())
+        if (ctx.ReadNeedCheckImplicit(1) || ctx.ReadNeedCheckImplicit(2))
             return CheckResult.SuccessNegative;
 
         if (ctx.ReadIsRootImplicit() != ctx.ReadInContentImplicit())
             return CheckResult.SuccessPositive;
 
-        return ctx.ReadNeedCheckImplicit() ? CheckResult.SuccessNegative : CheckResult.Failure;
+        return CheckResult.Failure;
         }
     }

@@ -24,8 +24,8 @@ public static class Scenario
         {
         return builder.ConfigureServices(s =>
         {
-            s.AddSingleton<IActor>(new SyncRootFolders.Actor("Remove", false, true));
-            s.AddSingleton<IActor>(new SyncRootFolders.Actor("Add", true, false));
+            s.AddSingleton<IActor>(new SyncRootFolders.Actor("Remove", 1, false, true));
+            s.AddSingleton<IActor>(new SyncRootFolders.Actor("Add", 2, true, false));
             s.AddSingleton<IActor>(new SyncRootFolders.CheckActor());
             s.AddSingleton<IContext, SyncRootFolders.Context>();
             s.AddSingleton<IValidator, SyncRootFolders.Validator>();

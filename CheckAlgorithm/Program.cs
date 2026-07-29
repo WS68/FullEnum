@@ -16,7 +16,7 @@ namespace CheckAlgorithm
                     l.AddConsole();
                     l.SetMinimumLevel(LogLevel.Information);
                 })
-                .CheckTwoPhaseCommit();
+                .CheckSyncRootFolder();
 
             var app = builder.Build();
             var runner = app.Services.GetRequiredService<Runner>();

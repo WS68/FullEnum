@@ -193,7 +193,7 @@ namespace Tests
             }
 
         [TestMethod]
-        public void FixIsRootSetsNeedCheckWithoutChangingIsRoot()
+        public void FixIsRootSetsIsRootAndNeedCheckWhenValuesDiffer()
             {
             var context = new Context();
             var actor = new Actor("actor", false, false);
@@ -207,8 +207,26 @@ namespace Tests
 
             context.CloseTransaction("actor");
 
-            Assert.IsTrue(context.ReadIsRootImplicit());
+            Assert.IsFalse(context.ReadIsRootImplicit());
             Assert.IsTrue(context.ReadNeedCheckImplicit());
+            }
+
+        [TestMethod]
+        public void FixIsRootDoesNotWriteWhenValuesMatch()
+            {
+            var context = new Context();
+
+            context.SaveIsRoot("actor", context.ReadIsRootImplicit());
+            context.GetTransaction("actor");
+            new SyncRootFolders.Steps.FixIsRootStep("actor", true).Execute(context);
+
+            Assert.IsTrue(context.ReadIsRootImplicit());
+            Assert.IsFalse(context.ReadNeedCheckImplicit());
+
+            context.CloseTransaction("actor");
+
+            Assert.IsTrue(context.ReadIsRootImplicit());
+            Assert.IsFalse(context.ReadNeedCheckImplicit());
             }
 
         [TestMethod]

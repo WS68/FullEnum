@@ -55,7 +55,7 @@ public sealed class FixIsRootStep : ContextStep
         var actor = Name["FixIsRoot_".Length..];
         var ctx = (Context)context;
         if (ctx.SavedIsRoot(actor) != _target)
-            ctx.WriteIsRoot(actor, _target);
+            ctx.WriteNeedCheck(actor, true);
         return true;
         }
     }

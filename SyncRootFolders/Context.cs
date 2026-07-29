@@ -11,6 +11,7 @@ public sealed class Context : IContext
     private readonly Dictionary<string, bool> _savedIsRoot;
     private MvccValue<bool> _isRoot;
     private MvccValue<bool> _inContent;
+    private MvccValue<bool> _needCheck;
 
     public Context()
         {
@@ -20,6 +21,7 @@ public sealed class Context : IContext
         _savedIsRoot = new();
         _isRoot = new MvccValue<bool>(true);
         _inContent = new MvccValue<bool>(false);
+        _needCheck = new MvccValue<bool>(false);
         }
 
     private Context(Context source)
@@ -31,6 +33,7 @@ public sealed class Context : IContext
         _savedIsRoot = new(source._savedIsRoot);
         _isRoot = source._isRoot.Clone();
         _inContent = source._inContent.Clone();
+        _needCheck = source._needCheck.Clone();
         }
 
     public int CurrentTransaction => _currentTransaction;
@@ -45,10 +48,12 @@ public sealed class Context : IContext
         }
     public bool ReadIsRootImplicit() => _isRoot.Read(new HashSet<int>(_completedTransactions));
     public bool ReadInContentImplicit() => _inContent.Read(new HashSet<int>(_completedTransactions));
+    public bool ReadNeedCheckImplicit() => _needCheck.Read(new HashSet<int>(_completedTransactions));
     public void SaveIsRoot(string actor, bool value) => _savedIsRoot[actor] = value;
     public bool SavedIsRoot(string actor) => _savedIsRoot.TryGetValue(actor, out var value) ? value : throw new ApplicationException($"Actor {actor} has not read isRoot");
     public void WriteInContent(string actor, bool value) => _inContent.Write(TransactionFor(actor), value);
     public void WriteIsRoot(string actor, bool value) => _isRoot.Write(TransactionFor(actor), value);
+    public void WriteNeedCheck(string actor, bool value) => _needCheck.Write(TransactionFor(actor), value);
     public void CloseTransaction(string actor)
         {
         var transaction = TransactionFor(actor);

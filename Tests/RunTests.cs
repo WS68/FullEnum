@@ -5,32 +5,32 @@ using SyncRootFolders;
 using Tests.Utils;
 
 namespace Tests
-{
+    {
     [TestClass]
     public class RunTests
-    {
+        {
         /// <summary>
         /// Тест проверяет, что все считается и результат валидации передается на выход
         /// </summary>
         [TestMethod]
         public void BasicRunTest()
-        {
+            {
             var a1 = new SimpleActor(new SimpleStep(), new SimpleStep());
             var a2 = new SimpleActor(new SimpleStep(), new SimpleStep());
 
             var ctx = new CountingContext();
             var validator = new StringValidator();
 
-            var runner = new Runner(new[] {a1, a2}, ctx, validator, new NullLogger<Runner>());
+            var runner = new Runner(new[] { a1, a2 }, ctx, validator, new NullLogger<Runner>());
 
             var stat = runner.Run();
-            Assert.AreEqual( 6, stat.Total );
-            Assert.AreEqual( 6, stat.PositiveResults );
+            Assert.AreEqual(6, stat.Total);
+            Assert.AreEqual(6, stat.PositiveResults);
             Assert.AreEqual(0, stat.NegativeResults);
             Assert.AreEqual(0, stat.Failures);
 
             ctx = new CountingContext();
-            validator = new StringValidator( CheckResult.SuccessNegative );
+            validator = new StringValidator(CheckResult.SuccessNegative);
             runner = new Runner(new[] { a1, a2 }, ctx, validator, new NullLogger<Runner>());
 
             stat = runner.Run();
@@ -48,15 +48,15 @@ namespace Tests
             Assert.AreEqual(0, stat.PositiveResults);
             Assert.AreEqual(0, stat.NegativeResults);
             Assert.AreEqual(6, stat.Failures);
-        }
+            }
 
         /// <summary>
         /// Тест проверяет, что все считается и результат валидации передается на выход
         /// </summary>
         [TestMethod]
         public void RunWithFailureTest()
-        {
-            var a1 = new SimpleActor(new SimpleStep(), new FailureStep(), new SimpleStep() );
+            {
+            var a1 = new SimpleActor(new SimpleStep(), new FailureStep(), new SimpleStep());
             var a2 = new SimpleActor(new SimpleStep(), new SimpleStep());
 
             var ctx = new CountingContext();
@@ -70,7 +70,7 @@ namespace Tests
             Assert.AreEqual(0, stat.NegativeResults);
             Assert.AreEqual(6, stat.Failures);
 
-            a1 = new SimpleActor(new FailureStep(), new SimpleStep() );
+            a1 = new SimpleActor(new FailureStep(), new SimpleStep());
             a2 = new SimpleActor(new SimpleStep(), new SimpleStep());
 
             ctx = new CountingContext();
@@ -83,15 +83,15 @@ namespace Tests
             Assert.AreEqual(0, stat.PositiveResults);
             Assert.AreEqual(0, stat.NegativeResults);
             Assert.AreEqual(3, stat.Failures);
-        }
+            }
 
         /// <summary>
         /// Тест проверяет, что все считается и результат валидации передается на выход
         /// </summary>
         [TestMethod]
         public void RunWithStopTest()
-        {
-            var a1 = new SimpleActor(new SimpleStep(), new SimpleStep( false ), new SimpleStep());
+            {
+            var a1 = new SimpleActor(new SimpleStep(), new SimpleStep(false), new SimpleStep());
             var a2 = new SimpleActor(new SimpleStep(), new SimpleStep());
 
             var ctx = new CountingContext();
@@ -105,7 +105,7 @@ namespace Tests
             Assert.AreEqual(6, stat.NegativeResults);
             Assert.AreEqual(0, stat.Failures);
 
-            a1 = new SimpleActor(new SimpleStep( false ), new SimpleStep());
+            a1 = new SimpleActor(new SimpleStep(false), new SimpleStep());
             a2 = new SimpleActor(new SimpleStep(), new SimpleStep());
 
             ctx = new CountingContext();
@@ -118,11 +118,11 @@ namespace Tests
             Assert.AreEqual(0, stat.PositiveResults);
             Assert.AreEqual(3, stat.NegativeResults);
             Assert.AreEqual(0, stat.Failures);
-        }
+            }
 
         [TestMethod]
         public void ReadCommittedReadsOnlyCompletedTransactions()
-        {
+            {
             var context = new Context();
 
             var firstTransaction = context.GetTransaction("first");
@@ -139,11 +139,11 @@ namespace Tests
             Assert.IsTrue(context.ReadInContentImplicit());
             Assert.AreEqual(1, firstTransaction);
             Assert.AreEqual(2, secondTransaction);
-        }
+            }
 
         [TestMethod]
         public void ReadCommittedHidesActiveIsRootWrite()
-        {
+            {
             var context = new Context();
 
             context.GetTransaction("first");
@@ -158,11 +158,11 @@ namespace Tests
             context.CloseTransaction("first");
 
             Assert.IsFalse(context.ReadIsRootImplicit());
-        }
+            }
 
         [TestMethod]
         public void ReadCommittedRefreshesSnapshotForEachRead()
-        {
+            {
             var context = new Context();
             var transaction = context.GetTransaction("actor");
             context.WriteIsRoot("actor", false);
@@ -173,6 +173,57 @@ namespace Tests
 
             Assert.IsFalse(context.ReadIsRootImplicit());
             Assert.AreEqual(1, transaction);
+            }
+
+        [TestMethod]
+        public void NeedCheckStartsFalseAndHidesActiveWrite()
+            {
+            var context = new Context();
+
+            Assert.IsFalse(context.ReadNeedCheckImplicit());
+
+            context.GetTransaction("actor");
+            context.WriteNeedCheck("actor", true);
+
+            Assert.IsFalse(context.ReadNeedCheckImplicit());
+
+            context.CloseTransaction("actor");
+
+            Assert.IsTrue(context.ReadNeedCheckImplicit());
+            }
+
+        [TestMethod]
+        public void FixIsRootSetsNeedCheckWithoutChangingIsRoot()
+            {
+            var context = new Context();
+            var actor = new Actor("actor", false, false);
+
+            context.SaveIsRoot("actor", context.ReadIsRootImplicit());
+            context.GetTransaction("actor");
+            new SyncRootFolders.Steps.FixIsRootStep("actor", false).Execute(context);
+
+            Assert.IsTrue(context.ReadIsRootImplicit());
+            Assert.IsFalse(context.ReadNeedCheckImplicit());
+
+            context.CloseTransaction("actor");
+
+            Assert.IsTrue(context.ReadIsRootImplicit());
+            Assert.IsTrue(context.ReadNeedCheckImplicit());
+            }
+
+        [TestMethod]
+        public void ValidatorUsesNeedCheckOnlyWhenValuesMatch()
+            {
+            var validator = new Validator();
+            var context = new Context();
+
+            Assert.AreEqual(CheckResult.Failure, validator.EvaluateResult(context, Array.Empty<RunResult>()));
+
+            context.GetTransaction("actor");
+            context.WriteNeedCheck("actor", true);
+            context.CloseTransaction("actor");
+
+            Assert.AreEqual(CheckResult.SuccessNegative, validator.EvaluateResult(context, Array.Empty<RunResult>()));
+            }
         }
     }
-}

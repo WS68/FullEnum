@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using RunAlgorithm.Core;
 using RunAlgorithm.Core.Steps;
+using SyncRootFolders;
 using Tests.Utils;
 
 namespace Tests
@@ -117,6 +118,61 @@ namespace Tests
             Assert.AreEqual(0, stat.PositiveResults);
             Assert.AreEqual(3, stat.NegativeResults);
             Assert.AreEqual(0, stat.Failures);
+        }
+
+        [TestMethod]
+        public void ReadCommittedReadsOnlyCompletedTransactions()
+        {
+            var context = new Context();
+
+            var firstTransaction = context.GetTransaction("first");
+
+            var secondTransaction = context.GetTransaction("second");
+            context.CloseTransaction("second");
+
+            context.WriteInContent("first", true);
+
+            Assert.IsFalse(context.ReadInContentImplicit());
+
+            context.CloseTransaction("first");
+
+            Assert.IsTrue(context.ReadInContentImplicit());
+            Assert.AreEqual(1, firstTransaction);
+            Assert.AreEqual(2, secondTransaction);
+        }
+
+        [TestMethod]
+        public void ReadCommittedHidesActiveIsRootWrite()
+        {
+            var context = new Context();
+
+            context.GetTransaction("first");
+
+            context.GetTransaction("second");
+            context.CloseTransaction("second");
+
+            context.WriteIsRoot("first", false);
+
+            Assert.IsTrue(context.ReadIsRootImplicit());
+
+            context.CloseTransaction("first");
+
+            Assert.IsFalse(context.ReadIsRootImplicit());
+        }
+
+        [TestMethod]
+        public void ReadCommittedRefreshesSnapshotForEachRead()
+        {
+            var context = new Context();
+            var transaction = context.GetTransaction("actor");
+            context.WriteIsRoot("actor", false);
+
+            Assert.IsTrue(context.ReadIsRootImplicit());
+
+            context.CloseTransaction("actor");
+
+            Assert.IsFalse(context.ReadIsRootImplicit());
+            Assert.AreEqual(1, transaction);
         }
     }
 }

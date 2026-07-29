@@ -33,8 +33,8 @@ public sealed class Context : IContext
         if (_actorTransactions.ContainsKey(actor)) throw new ApplicationException($"Actor {actor} already has an open transaction");
         var transaction = ++_currentTransaction; _activeTransactions.Add(transaction); _actorTransactions.Add(actor, transaction); return transaction;
     }
-    public bool ReadIsRootImplicit() => _isRoot.Read(_completedTransactions.Max());
-    public bool ReadInContentImplicit() => _inContent.Read(_completedTransactions.Max());
+    public bool ReadIsRootImplicit() => _isRoot.Read(new HashSet<int>(_completedTransactions));
+    public bool ReadInContentImplicit() => _inContent.Read(new HashSet<int>(_completedTransactions));
     public void SaveIsRoot(string actor, bool value) => _savedIsRoot[actor] = value;
     public bool SavedIsRoot(string actor) => _savedIsRoot.TryGetValue(actor, out var value) ? value : throw new ApplicationException($"Actor {actor} has not read isRoot");
     public void WriteInContent(string actor, bool value) => _inContent.Write(TransactionFor(actor), value);

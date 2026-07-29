@@ -23,7 +23,7 @@ public sealed class ReadIsRootStep : ContextStep
         {
         var actor = Name["ReadIsRoot_".Length..];
         var ctx = (Context)context;
-        ctx.SaveIsRoot(actor, ctx.ReadIsRootImplicit());
+        ctx.SaveIsRoot(actor, ctx.ReadIsRoot(actor));
         return true;
         }
     }

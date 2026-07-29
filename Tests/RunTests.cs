@@ -198,8 +198,8 @@ namespace Tests
             var context = new Context();
             var actor = new Actor("actor", false, false);
 
-            context.SaveIsRoot("actor", context.ReadIsRootImplicit());
             context.GetTransaction("actor");
+            context.SaveIsRoot("actor", context.ReadIsRoot("actor"));
             new SyncRootFolders.Steps.FixIsRootStep("actor", false).Execute(context);
 
             Assert.IsTrue(context.ReadIsRootImplicit());
@@ -216,8 +216,8 @@ namespace Tests
             {
             var context = new Context();
 
-            context.SaveIsRoot("actor", context.ReadIsRootImplicit());
             context.GetTransaction("actor");
+            context.SaveIsRoot("actor", context.ReadIsRoot("actor"));
             new SyncRootFolders.Steps.FixIsRootStep("actor", true).Execute(context);
 
             Assert.IsTrue(context.ReadIsRootImplicit());
